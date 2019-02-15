@@ -3,3 +3,134 @@ title: "Formazione - Giorno 1"
 output: html_notebook
 ---
 
+# Intro
+
+```{r}
+
+1+1
+
+c(1,2,6)
+
+c(3, 6, 9) + c(1,2,6)
+
+vec <- c(1, 2, 6)
+
+vec
+
+char_vec <- c("a", "b", "a", "a", "b")
+
+# fac_vec <- as.factor(char_vec)
+```
+
+
+# Libraries
+
+```{r}
+library(readxl)
+```
+
+
+
+# Data reading - XLS
+
+```{r}
+mdata <- read_excel("media-data.xlsx")
+```
+
+
+# Basic data exploration
+
+```{r}
+str(mdata)
+```
+
+```{r}
+View(mdata)
+```
+
+```{r}
+summary(mdata)
+```
+
+
+# Graphic exploration
+
+```{r}
+library(ggplot2)
+```
+
+
+## Line
+
+```{r}
+qplot(x = Start, y = Qty, data = mdata, geom = "line") 
+```
+
+
+## Point
+
+```{r}
+qplot(x = Start, y = Qty, data = mdata, geom = "point")
+```
+
+
+## Histogram
+
+```{r}
+qplot(x = Tv_30, data = mdata, geom = "histogram")
+```
+
+
+
+# Data manipulation
+
+```{r}
+library(dplyr)
+```
+
+
+## Select
+
+```{r}
+radio_data <- mdata %>%
+  select(Week, Qty, Radio_15, Radio_30)
+```
+
+
+```{r}
+digital_data <- mdata %>%
+  select(Week, Qty, starts_with("Digital"))
+```
+
+```{r}
+digital_data <- mdata %>%
+  select(-DigitalNative)
+```
+
+```{r}
+digital_data <- mdata %>%
+  select(-`Digital Search`)
+```
+
+
+## Filter
+
+```{r}
+grp_tv <- mdata %>% 
+  filter(TV_15 > 2)
+```
+
+```{r}
+qplot(data = grp_tv, x = TV_15, bins = 50)
+```
+
+
+```{r}
+mdata_2018 <- mdata %>% 
+  filter(Start >= "2018-01-01")
+```
+
+```{r}
+qplot(data = mdata_2018, x = Start, y = Qty, geom = "line")
+```
+
