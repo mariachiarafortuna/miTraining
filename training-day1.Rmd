@@ -1,6 +1,8 @@
 ---
 title: "Formazione - Giorno 1"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Intro
@@ -45,7 +47,7 @@ str(mdata)
 ```
 
 ```{r}
-View(mdata)
+#View(mdata)
 ```
 
 ```{r}
