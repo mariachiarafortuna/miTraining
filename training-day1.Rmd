@@ -1,9 +1,18 @@
 ---
 title: "Formazione - Giorno 1"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
+
+```{r, echo = F}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  message=FALSE,
+  warning = FALSE)
+```
 
 # Intro
 

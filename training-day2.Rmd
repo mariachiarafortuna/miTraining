@@ -1,0 +1,163 @@
+---
+title: "Training day 2"
+output: html_notebook
+---
+
+# Ripasso
+
+## Data import
+
+```{r}
+library(readxl)
+mdata <- read_excel("media-data.xlsx")
+```
+
+
+## Data manipulation
+
+### Select
+
+```{r}
+library(dplyr)
+
+tv_radio_data <- mdata %>%
+  select(Week, Start, Qty, Eventi, Temperatura, 
+         Tv_15 = TV_15, Tv_30, Radio_15, Radio_30)
+  
+```
+
+### Filter
+
+```{r}
+tv_radio_data_17 <- tv_radio_data %>% 
+  filter(Start >= "2017-01-01" & Start <= "2017-12-31")
+```
+
+
+# New topics
+
+## Mutate
+
+Trasformazioni delle variabili di partenza
+
+```{r}
+tr_full <- tv_radio_data %>%
+  mutate(Tv_15 = round(Tv_15, 0),
+         Tv_30 = round(Tv_30, 0))
+```
+
+
+Operazioni algebriche tra variabili
+
+```{r}
+tr_full <- tr_full %>%
+  mutate(Tv = Tv_15 + Tv_30)
+```
+
+Case when
+
+```{r}
+tr_full <- tr_full %>%
+  mutate(If_Tv = case_when(
+    Tv > 0 ~ 1,
+    TRUE ~ 0 
+  ))
+```
+
+**Rifare esercizio con Radio**
+
+
+Mutate_if
+
+```{r}
+tr_full <- tr_full %>%
+  mutate_if(is.numeric, round, digits = 0)
+```
+
+
+
+```{r}
+tr_full <- tr_full %>%
+  mutate(Radio = Radio_15 + Radio_30,
+         Tv_Radio = Tv + Radio, 
+         If_radio = case_when(
+           Tv_Radio > 0 ~ 1,
+           TRUE ~ 0)
+  )
+```
+
+
+### Lubridate
+
+```{r}
+library(lubridate)
+
+tr_full <- tr_full %>%
+  mutate(Giorno = day(Start),
+         Mese_num = month(Start),
+         Mese = month(Start, label = T),
+         Anno = year(Start))
+```
+
+
+# Join
+
+```{r}
+
+season_data <- data.frame(
+  Mese_num = 1:12,
+  Stagione = c("Alta_Stagione", "Alta_Stagione", "Alta_Stagione", 
+               "Alta_Stagione", "Alta_Stagione", "Alta_Stagione",
+               "Bassa_Stagione", "Bassa_Stagione", "Bassa_Stagione", 
+               "Alta_Stagione", "Alta_Stagione", "Alta_Stagione")
+)
+
+
+tr_full <- tr_full %>%
+  left_join(season_data)
+```
+
+
+
+# Write data
+
+```{r}
+write.csv(tr_full, file = "tv_radio_data.csv")
+```
+
+
+
+# Read data
+
+```{r}
+tv_radio_data <- read.csv("tv_radio_data.csv")
+```
+
+
+# Analisi delle vendite
+
+In questa sezione analizziamo le vendite realizzate nell'ultimo triennio
+
+## Totale venduto
+
+Il totale dei pezzi venduti nel triennio è pari a:
+
+```{r echo = F}
+tv_radio_data %>%
+  summarise(Vendite = sum(Qty))
+```
+
+## Vendite per anno
+
+```{r}
+tv_radio_data %>%
+  group_by(Anno) %>%
+  summarise(Vendite = sum(Qty)) 
+```
+
+
+## Grafico vendite
+
+```{r}
+qplot()
+```
