@@ -133,6 +133,13 @@ write.csv(tr_full, file = "tv_radio_data.csv")
 tv_radio_data <- read.csv("tv_radio_data.csv")
 ```
 
+```{r}
+tv_radio_data <- tv_radio_data %>%
+  mutate(Start = ymd(Start)) %>%
+  filter(!is.na(Week))
+```
+
+
 
 # Analisi delle vendite
 
@@ -159,5 +166,41 @@ tv_radio_data %>%
 ## Grafico vendite
 
 ```{r}
-qplot()
+library(ggplot2)
 ```
+
+
+```{r}
+qplot(x = Start, y = Qty, data = tv_radio_data, geom = "line") +
+  ylim(3000, 6000) +
+  theme_minimal() +
+  labs(title = "Andamento vendite nel triennio")
+```
+
+
+```{r}
+qplot(x = Start, y = Qty, data = tv_radio_data, geom = "line",
+      colour = Anno) +
+  ylim(3000, 6000) +
+  theme_minimal() +
+  labs(title = "Andamento vendite nel triennio")
+```
+
+
+```{r}
+qplot(x = Week, y = Qty, data = tv_radio_data, geom = "line",
+      colour = Anno, facets = .~Anno) +
+  ylim(3000, 6000) +
+  theme_minimal() +
+  labs(title = "Andamento vendite nel triennio") 
+```
+
+# Alta vs bassa stagione
+
+```{r}
+tv_radio_data %>%
+  group_by(Anno, Stagione) %>%
+  summarise(Vendite = sum(Qty))
+```
+
+
