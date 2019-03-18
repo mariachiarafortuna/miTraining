@@ -1,0 +1,64 @@
+---
+title: "Report Vendite"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+Adesso importo le library
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+
+Questo è il report delle vendite e dei GRP
+
+
+```{r}
+tv_radio_report <- read.csv("tv_radio_report.csv")
+
+tv_radio_report <- tv_radio_report %>%
+  filter(!is.na(Week))
+
+```
+
+
+
+
+# Vendite e GRP nel triennio
+
+```{r}
+tv_radio_report %>%
+  summarise(vendite = sum(Qty),
+            GRP = sum(Tv_30))
+```
+
+
+# Vendite e GRP anno per anno
+
+```{r}
+tv_radio_report %>%
+  group_by(Anno) %>%
+  summarise(vendite = sum(Qty),
+            GRP = sum(Tv_30))
+```
+
+
+# Grafico delle vendite
+
+```{r echo=F}
+qplot(x = X, y = Qty, data = tv_radio_report,
+      geom = "line") 
+```
+
+# Grafico vendite per anno
+
+```{r}
+qplot(x = Week, y = Qty, data = tv_radio_report,
+      facets = . ~ Anno, colour = Anno, 
+      geom = "line")
+```
+

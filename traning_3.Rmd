@@ -1,0 +1,129 @@
+---
+title: "Ggplot e i fumett"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(plotly)
+```
+
+```{r}
+marvel_data <- read.csv("marvel-wikia-data.csv", 
+                        na.string = "") # valori mancanti
+```
+
+
+# Analisi univariate
+
+```{r}
+ggplot(data=marvel_data, aes(x=SEX)) +
+  geom_bar() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+ggplot(data=marvel_data, aes(x=SEX, fill = ALIVE)) +
+  geom_bar(position = "stack") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+ggplot(data=marvel_data, aes(x=SEX, fill = ALIVE)) +
+  geom_bar(position = "dodge") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+ggplot(data=marvel_data, aes(x=SEX, fill = ALIVE)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+## Barplot con dati aggregati
+
+```{r}
+sex_count <- marvel_data %>%
+  group_by(SEX) %>%
+  summarise(n_personaggi = n())
+
+print(sex_count)
+```
+
+
+```{r}
+ggplot(data=sex_count, aes(x=SEX, y=n_personaggi)) +
+  geom_col() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+sex_align_count <- marvel_data %>%
+  group_by(SEX, ALIGN) %>%
+  summarise(n_personaggi = n())
+```
+
+```{r}
+sex_align_count
+```
+
+```{r}
+ggplot(data=sex_align_count, aes(x=SEX, y=n_personaggi, fill = ALIGN)) +
+  geom_col() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+## Grafico a torta
+
+```{r}
+pie <- ggplot(marvel_data, aes(x = factor(1), fill = SEX)) +
+  geom_bar() +
+  coord_polar(theta = "y") +
+  theme_void()
+
+ggsave("pie_marvel.png", plot = pie)
+```
+
+
+
+# Analisi bivariate
+
+```{r}
+marvel_data <- marvel_data %>%
+  mutate(anni_attivita = 2019-Year)
+```
+
+
+## Scatterplot
+
+```{r}
+scatter_app <- ggplot(data = marvel_data %>% filter(APPEARANCES > 200), 
+                      aes(x = anni_attivita, 
+                          y = APPEARANCES,
+                          text = name,
+                          color = SEX,
+                          shape = ALIGN,
+                          size = ALIVE,
+                          alpha = APPEARANCES)) +
+  geom_point()
+
+ggplotly(scatter_app)
+
+
+```
+
+

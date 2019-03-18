@@ -1,0 +1,227 @@
+---
+title: "ggplot2 class"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r, echo = F}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  message=FALSE,
+  warning = FALSE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+
+```{r}
+marvel_raw <- read.csv("marvel-wikia-data.csv", na.strings = "")
+```
+
+
+# BARPLOT
+
+## Conteggio automatico
+
+```{r}
+ggplot(data=marvel_raw, 
+       aes(x=SEX)) +
+  geom_bar() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+### Con fill
+
+```{r}
+ggplot(data=marvel_raw, 
+       aes(x=SEX, fill = ALIVE)) +
+  geom_bar() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+### Position dodge
+
+```{r}
+ggplot(data=marvel_raw, 
+       aes(x=SEX, fill = ALIVE)) +
+  geom_bar(position = "dodge") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+### Position fill
+
+```{r}
+ggplot(data=marvel_raw, 
+       aes(x=SEX, fill = ALIVE)) +
+  geom_bar(position = "fill") +
+    theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+## Conteggio manuale
+
+```{r}
+sex_count <- marvel_raw %>%
+  group_by(SEX) %>%
+  summarise(n_character = n())
+```
+
+```{r}
+ggplot(sex_count, 
+       aes(x = SEX, y = n_character)) +
+  geom_col() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+### Con fill
+
+```{r}
+sex_count <- marvel_raw %>%
+  group_by(SEX, ALIVE) %>%
+  summarise(n_character = n())
+```
+
+```{r}
+ggplot(sex_count, 
+       aes(x = SEX, y = n_character, fill = ALIVE)) +
+  geom_col(position = "fill") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+
+
+# PIE
+
+```{r}
+ggplot(marvel_raw,
+       aes(factor(1), fill=SEX)) +
+  geom_bar(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void()
+```
+
+
+# SCATTERPLOT
+
+```{r}
+marvel <- marvel_raw %>%
+  mutate(y_activity = 2019-Year)
+```
+
+```{r}
+ggplot(marvel, 
+       aes(y_activity, APPEARANCES, color = SEX)) +
+  geom_point()
+```
+
+## Filter sui dati
+
+```{r}
+ggplot(marvel %>% filter(APPEARANCES > 200), 
+       aes(y_activity, APPEARANCES, color = SEX)) +
+  geom_point()
+```
+
+## Altre estetiche: shape, size, alpha
+
+```{r}
+ggplot(marvel %>% filter(APPEARANCES > 200), 
+       aes(y_activity, APPEARANCES, color = SEX,
+           shape = ALIGN, size = ALIVE, alpha = 0.5)) +
+  geom_point()
+```
+
+# Serie storiche
+
+## Barplot
+
+```{r}
+ggplot(marvel, aes(Year, fill = SEX)) +
+  geom_bar() +
+  theme_minimal()
+```
+
+## Line plot
+
+```{r}
+ggplot(marvel, aes(x = Year)) +
+  geom_line(stat = "count") +
+  theme_minimal()
+```
+
+
+### Raggruppamento per colore
+
+```{r}
+ggplot(marvel, aes(Year, color = SEX)) +
+  geom_line(stat = "count") +
+  theme_minimal()
+```
+
+## Add points
+
+```{r}
+ggplot(marvel, aes(Year, color = SEX)) +
+  geom_line(stat = "count") +
+  geom_point(stat = "count") +
+  theme_minimal()
+```
+
+### Modificare label e palette
+
+```{r}
+ggplot(marvel, aes(Year, color = SEX)) +
+  geom_line(stat = "count") +
+  geom_point(stat = "count") +
+  scale_color_brewer(palette = 2, type = "qual") +
+  ggtitle("Andamento nuovi personaggi per anno") +
+  labs(x = "Anno", y = "Numero personaggi")
+  
+```
+
+### Faceting
+
+```{r}
+ggplot(marvel, aes(Year, color = SEX)) +
+  geom_line(stat = "count") +
+  geom_point(stat = "count") +
+  facet_grid(ALIVE~., scales =  "free") +
+  theme_minimal()
+```
+
+
+
+```{r}
+ggplot(marvel, aes(Year, color = SEX)) +
+  geom_line(stat = "count") +
+  geom_point(stat = "count") +
+  scale_color_brewer(palette = 2, type = "qual") +
+  facet_grid(ALIVE~., scales =  "free")
+```
+
+```{r}
+ggplot(marvel, aes(Year, color = SEX)) +
+  geom_line(stat = "count") +
+  scale_color_brewer(palette = 2, type = "qual") +
+  facet_grid(ALIVE~ALIGN, scales =  "free")
+```
+
