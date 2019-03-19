@@ -1,20 +1,45 @@
 ---
 title: "R Training - Esercizi"
-output: html_notebook
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
-## R Notebook
+```{r, echo = F}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  eval = FALSE,
+  message=FALSE,
+  warning = FALSE)
+```
 
-1. Crea un nuovo R Notebook e salvalo come "r-training-esercizi" all'interno della cartella di progetto (la cartella che contiene il tuo progetto R)
+\vspace{0.8cm}
 
-2. Cambia il titolo del Notebook in "R training - Esercizi"
+Tutti i 15 esercizi che seguono sono relativi al file *"marvel-wikia-data.csv"*, che contiene l'elenco di tutti i personaggi Marvel con caratteristiche e numero di apparizioni.
 
-3. D'ora in poi, fai ogni esercizio in un nuovo chunk di codice. Ricorda che puoi commentare ogni esercizio scrivendo del testo fuori dai chunk di codice. Ricorda che puoi anche inserire dei titoli scrivendo il testo fuori dai chunk preceduto da #.
+Attraverso questi esercizi cercheremo in particolare di rispondere a due domande:
+
+1. **I personaggi maschili e i personaggi femminili hanno caratteristiche diverse?**
+
+2. **I personaggi famosi sono stati creati uniformemente nel tempo, o ci sono stati periodi di boom?**
+
+Se incontri difficoltà, hai delle incertezze o vuoi mandarmi il risultato finito, scrivimi a mariachiara.fortuna1@gmail.com :)
+
+\vspace{0.3cm}
+
+### R Notebook
+
+1. Crea un nuovo R Notebook e salvalo con il nome *"r-training-esercizi"* all'interno della cartella di progetto (la cartella che contiene il tuo progetto R)
+
+2. Cambia il titolo del Notebook in *"R training - Esercizi"*
+
+D'ora in poi, fai ogni esercizio in un nuovo chunk di codice. Ricorda che puoi commentare ogni esercizio scrivendo del testo fuori dai chunk di codice. Ricorda che puoi anche inserire dei titoli scrivendo il testo fuori dai chunk preceduto da #.
 
 
-## Librerie
+### Librerie
 
-3. (Ricorda di inserire un nuovo chunk di codice per ogni esercizio) Carica le librerie dplyr, ggplot e plotly 
+3. Carica le librerie `dplyr`, `ggplot` e `plotly`.  
 
 ```{r}
 library(dplyr)
@@ -23,9 +48,9 @@ library(plotly)
 ```
 
 
-## Importazione dei dati
+### Importazione dei dati
 
-4. (Ricorda di inserire un nuovo chunk di codice per ogni esercizio) Importa il file "marvel-wikia-data.csv"
+4. Importa il file *"marvel-wikia-data.csv"*
 
 ```{r}
 marvel_data <- read.csv("marvel-wikia-data.csv", 
@@ -33,13 +58,13 @@ marvel_data <- read.csv("marvel-wikia-data.csv",
 ```
 
 
-# Domanda di ricerca 
+# Domanda di ricerca 1 - Personaggi femminili e maschili
 
 Vogliamo capire se i personaggi femminili hanno caratteristiche diverse dai personaggi maschili 
 
-## Filter
+### Filter
 
-5. Crea il nuovo dataframe marvel_mf che contiene solo i personaggi di sesso maschile e di sesso femminile (suggerimento: controlla gli output della lezione 2 e ricorda che l'operazione logica "or" in R si fa con l'operatore | )
+5. Crea il nuovo dataframe `marvel_mf` che contenga solo i personaggi di sesso maschile e di sesso femminile *Suggerimento: controlla gli output della lezione 2 e ricorda che in R l'operatore logico "or" è* `|`
 
 ```{r}
 marvel_fm <- marvel_data %>%
@@ -47,9 +72,9 @@ marvel_fm <- marvel_data %>%
 ```
 
 
-## Pie
+### Torta
 
-6. Rappresenta con un grafico a torta la distribuzione della variabile SEX del dataframe marvel_fm
+6. Rappresenta con un grafico a torta la distribuzione della variabile `SEX` del dataframe `marvel_fm`
 
 ```{r}
 ggplot(marvel_fm, aes(x = factor(1), fill = SEX)) +
@@ -59,9 +84,9 @@ ggplot(marvel_fm, aes(x = factor(1), fill = SEX)) +
 ```
 
 
-## Barplot
+### Barplot
 
-7. Rappresenta con un grafico a barre la distribuzione di personaggi buoni e cattivi (variabile ALIGN). Se vuoi, aggiusta i parametri grafici in modo che il grafico risulti più leggibile 
+7. Rappresenta con un grafico a barre la distribuzione di personaggi buoni e cattivi (variabile `ALIGN`). *Se vuoi, aggiusta i parametri grafici in modo che il grafico risulti più leggibile* 
 
 ```{r}
 ggplot(data=marvel_fm, aes(x = ALIGN)) +
@@ -82,19 +107,20 @@ ggplot(data=marvel_fm, aes(x = ALIGN, fill = SEX)) +
 9. Modifica il grafico precedente in modo che mostri, per ogni barra, la composizione percentuale per sesso. Ti sembra che maschi e femmine siano equamente distribuiti tra personaggi buoni e cattivi?
 
 ```{r}
-ggplot(data=marvel_fm, aes(x = ALIGN, fill = SEX)) +
-  geom_bar(position = "fill") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-10. Trasforma l'ultimo grafico creato in un grafico interattivo utilizzando la funzione ggplotly()
-
-```{r}
 bar <- ggplot(data=marvel_fm, aes(x = ALIGN, fill = SEX)) +
   geom_bar(position = "fill") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+bar
+```
+
+### Barplot interattivo
+
+10. Trasforma l'ultimo grafico creato in un grafico interattivo utilizzando la funzione `ggplotly()`
+
+```{r}
+
 
 ggplotly(bar)
 ```
@@ -103,45 +129,61 @@ ggplotly(bar)
 
 
 
-# Domanda di ricerca 2 
+# Domanda di ricerca 2 - Creazione dei personaggi più famosi
 
-11. Crea uno scatterplot che metta in relazione l'anno di prima apparizione di un personaggio (variabile Year) con il numero di apparizioni. Utilizza l'estetica color per colorare i punti in base all'allineamento del personaggio (se buono o cattivo, variabile ALIGN)  
+Vogliamo verificare la relazione tra anno di prima apparizione di un personaggio (variabile `Year`) e numero di apparizioni (variabile `APPEARANCES`). In particolare vogliamo capire se la nascita dei personaggi è concentrata in alcuni momenti nel tempo o se è distribuita in tutto il periodo.
+
+
+### Scatterplot
+
+11. Crea uno scatterplot che metta in relazione l'anno di prima apparizione di un personaggio con il numero di apparizioni. Utilizza l'estetica `color` per colorare i punti in base all'allineamento del personaggio (variabile `ALIGN`). *Se vuoi, per rendere la computazione meno pesante, filtra solo le osservazioni con più di 150 apparizioni.*  
 
 ```{r}
-ggplot(marvel_fm, aes(x = Year, y = APPEARANCES,
+scatter <- ggplot(marvel_data %>% filter(APPEARANCES > 150), 
+       aes(x = Year, y = APPEARANCES,
                       color = ALIGN)) +
          geom_point()
+
+scatter
 ```
 
 
-12. Trasforma lo scatterplot in un grafico interattivo. Visualizza nel tooltip il nome di ogni personaggio utilizzando l'estetica text.
+### Scatterplot interattivo
+
+12. Trasforma lo scatterplot in un grafico interattivo.  Visualizza nel tooltip il nome di ogni personaggio utilizzando l'estetica `text`.
 
 
 ```{r}
-scatter <- ggplot(marvel_fm, aes(x = Year, y = APPEARANCES,
-                      color = ALIGN, text = name)) +
-         geom_point()
-
 ggplotly(scatter)
 ```
 
 
-13. Dall'ultimo grafico possiamo osservare che la relazione 
+### Aggregazioni
+
+13. Costruisci una tabella di sintesi che calcoli, per ogni anno, il numero medio di apparizioni. 
+*Suggerimento: devi raggruppare per anno e calcolare la media di `APPEARANCES` Ricorda di utilizzare il parametro `na.rm=T` per fare in modo che la media sia calcolabile nonostante le osservazioni mancanti*
 
 ```{r}
-app_av_data <- marvel_fm %>%
+app_av_data <- marvel_data %>%
   group_by(Year) %>%
   summarise(avg_app = mean(APPEARANCES, na.rm = T))
 ```
 
 
+### Scatterplot su tabella aggregata
 
+14. Utilizza la tabella appena creata per rappresentare in uno scatterplot i valori ottenuti. Ti sembra che la relazione sia costante nel tempo? 
+*Suggerimento: dovrai utilizzare la variabile `Year` nell'asse X e la variabile creata precedentemente con `summarise()` nell'asse Y* 
 
 ```{r}
 ggplot(app_av_data, aes(x = Year, y = avg_app)) +
   geom_point()
 ```
 
+
+### Compilazione in html
+
+15. Compila tutto il lavoro svolto in un report html. Funziona? I grafici sono interattivi? Sei soddisfatto dei titoli e dei commenti? Modifica eventualmente quello che non ti piace e manda tutto a mariachiara.fortuna1@gmail.com :)
 
 
 
