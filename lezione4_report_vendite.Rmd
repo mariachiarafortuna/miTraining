@@ -1,0 +1,207 @@
+---
+title: "Report vendite CC"
+author: "Mariachiara Fortuna"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message=FALSE,
+  warning = FALSE)
+```
+
+
+
+```{r}
+library(readxl)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+```
+
+
+```{r}
+data <- read_excel("gv_data_clean.xlsx", skip = 7)
+```
+
+
+# Summary del periodo - CC
+
+```{r}
+data %>%
+  summarise(tot_sole = sum(vendite_sole_cc),
+            tot_vista = sum(vendite_vista_cc))
+```
+
+
+# Dettaglio per anno
+
+```{r}
+data <- data %>%
+  mutate(anno = year(start),
+         mese = month(start))
+```
+
+```{r}
+data %>%
+  group_by(anno) %>%
+  summarise(tot_sole = sum(vendite_sole_cc),
+            tot_vista = sum(vendite_vista_cc)) %>%
+  mutate("% sole" = scales::percent(tot_sole/sum(tot_sole)),
+         "% vista" = scales::percent(tot_vista/sum(tot_vista)),
+         tot_pezzi = tot_sole + tot_vista,
+         quota_sole = scales::percent(tot_sole/tot_pezzi))
+```
+
+# Analisi sole
+
+## Serie storica sole
+
+Osserviamo le vendite degli occhiali da sole nei centri commerciali
+
+```{r}
+ggplot(data, aes(x = settimana, y = vendite_sole_cc)) +
+  geom_line(col = "Orange") +
+  facet_wrap(.~anno) +
+  labs(title = 
+         paste("Andamento vendite sole cc dal", 
+                min(data$anno), "al", max(data$anno)),
+       y = "Vendite") +
+  theme_minimal()
+```
+
+## Analisi per settmana
+
+```{r}
+data %>%
+  group_by(anno, settimana) %>%
+  summarise(tot_sole = sum(vendite_sole_cc)) 
+```
+
+
+
+```{r}
+ggplot(data, aes(x = settimana, y = vendite_sole_cc, 
+                 col = as.factor(anno))) +
+  geom_line(size = 1) +
+  scale_color_brewer(palette = "Oranges", name = "Anno") +
+  theme_minimal() +
+  labs(y = "Vendite")
+```
+
+
+```{r}
+ggplot(data, aes(x = settimana, y = vendite_sole_cc, 
+                 fill = as.factor(anno))) +
+  geom_col() +
+  scale_fill_brewer(palette = "Oranges", name = "Anno") +
+  theme_minimal() +
+  labs(y = "Vendite")
+```
+
+
+# Analisi per mese - Stagionalità
+
+```{r}
+sole_mese <- data %>%
+  group_by(anno, mese) %>%
+  summarise(tot_sole = sum(vendite_sole_cc))
+
+sole_mese
+```
+
+```{r}
+ggplot(sole_mese, aes(x=mese, y = tot_sole, 
+                      col = as.factor(anno))) +
+  geom_line(size = 1) +
+  scale_color_brewer(palette = "Oranges", name = "Anno") +
+  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  theme_minimal()
+```
+
+
+# Analisi vista
+
+## Serie storica vista
+
+Osserviamo le vendite degli occhiali da vista nei centri commerciali
+
+```{r}
+ggplot(data, aes(x = settimana, y = vendite_vista_cc)) +
+  geom_line(col = "royalblue") +
+  facet_wrap(.~anno) +
+  labs(title = 
+         paste("Andamento vendite vista cc dal", 
+                min(data$anno), "al", max(data$anno)),
+       y = "Vendite") +
+  theme_minimal()
+```
+
+## Analisi per settmana
+
+```{r}
+data %>%
+  group_by(anno, settimana) %>%
+  summarise(tot_vista = sum(vendite_vista_cc)) 
+```
+
+
+
+```{r}
+ggplot(data, aes(x = settimana, y = vendite_vista_cc, 
+                 col = as.factor(anno))) +
+  geom_line(size = 1) +
+  scale_color_brewer(palette = "Blues", name = "Anno") +
+  theme_minimal() +
+  labs(y = "Vendite")
+```
+
+
+```{r}
+ggplot(data, aes(x = settimana, y = vendite_vista_cc, 
+                 fill = as.factor(anno))) +
+  geom_col() +
+  scale_fill_brewer(palette = "Blues", name = "Anno") +
+  theme_minimal() +
+  labs(y = "Vendite")
+```
+
+
+# Analisi per mese - Stagionalità
+
+```{r}
+vista_mese <- data %>%
+  group_by(anno, mese) %>%
+  summarise(tot_vista = sum(vendite_vista_cc))
+
+vista_mese
+```
+
+```{r}
+ggplot(vista_mese, aes(x=mese, y = tot_vista, 
+                      col = as.factor(anno))) +
+  geom_line(size = 1) +
+  scale_color_brewer(palette = "Blues", name = "Anno") +
+  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  theme_minimal()
+```
+
+
+# Confronto vista vs sole
+
+```{r}
+ggplot(data) +
+  geom_line(aes(x = settimana, y = vendite_vista_cc), col = "royalblue") +
+  geom_line(aes(x = settimana, y = vendite_sole_cc), col = "Orange") +
+  facet_wrap(.~anno) +
+  labs(title = 
+         paste("Confronto vendite vista/sole cc", 
+                min(data$anno), "al", max(data$anno)),
+       y = "Vendite") +
+  theme_minimal()
+```
+

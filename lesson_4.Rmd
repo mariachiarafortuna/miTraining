@@ -1,0 +1,180 @@
+---
+title: "Lesson 4"
+output:
+  pdf_document: default
+  html_notebook: default
+  html_document:
+    df_print: paged
+---
+
+```{r, echo = F}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  message=FALSE,
+  warning = FALSE)
+```
+
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+data <- read_excel("gv_data_clean.xlsx", skip = 7)
+```
+
+
+# Summary di periodo
+
+```{r}
+data %>%
+  summarise(sole = sum(vendite_sole),
+            sole_cc = sum(vendite_sole_cc),
+            sole_hs = sum(vendite_vista_cc))
+```
+
+
+# Dettaglio per anno
+
+```{r}
+data <- data %>%
+  mutate(anno = year(start))
+  
+data %>%
+  group_by(anno) %>%
+  summarise(sole = sum(vendite_sole),
+            sole_cc = sum(vendite_sole_cc),
+            sole_hs = sum(vendite_vista_cc))
+```
+
+
+# Serie storica sole
+
+```{r}
+ggplot(data, aes(x = settimana, y = vendite_sole_cc)) +
+  geom_line(col = "Orange") +
+  facet_wrap(.~anno) +
+  theme_minimal() +
+  labs(title = "Andamento vendite sole cc", y = "Vendite")
+```
+
+
+# Istogramma sole
+
+```{r}
+sole_settimana_anno <- data %>%
+  group_by(settimana, anno) %>%
+  summarise(vendite = sum(vendite_sole_cc))
+```
+
+
+```{r}
+ggplot(sole_settimana_anno, 
+       aes(x = settimana, y = vendite, fill = as.factor(anno))) +
+  geom_col(position = position_stack(reverse = TRUE)) +
+  theme_minimal() +
+  scale_fill_brewer(name= "Anno", palette = "Oranges") +
+  labs(title = "Andamento vendite sole cc", y = "Vendite")
+```
+
+
+# Analisi stagionalità
+
+```{r}
+data <- data %>%
+  mutate(mese = month(start))
+```
+
+```{r}
+sole_anno_mese <- data %>%
+  group_by(anno, mese) %>%
+  summarise(vendite = sum(vendite_sole_cc))  %>%
+  group_by(anno) %>%
+  mutate("% annua" = scales::percent(vendite/sum(vendite)))
+
+sole_anno_mese
+```
+
+
+
+```{r}
+ggplot(sole_anno_mese, 
+       aes(x = mese, y = vendite, col = as.factor(anno))) +
+  geom_line() +
+  scale_color_brewer(name= "Anno", palette = "Oranges") +
+  labs(title = "Andamento vendite sole cc", y = "Vendite") +
+  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  theme_minimal()
+  
+```
+
+# Serie storica vista
+
+```{r}
+ggplot(data, aes(x = settimana, y = vendite_vista_cc)) +
+  geom_line(col = "royalblue") +
+  facet_wrap(.~anno) +
+  theme_minimal() +
+  labs(title = "Andamento vendite vista cc", y = "Vendite")
+```
+
+
+
+
+
+# Istogramma vista
+
+```{r}
+vista_settimana_anno <- data %>%
+  group_by(settimana, anno) %>%
+  summarise(vendite = sum(vendite_vista_cc))
+```
+
+
+```{r}
+ggplot(vista_settimana_anno, 
+       aes(x = settimana, y = vendite, fill = as.factor(anno))) +
+  geom_col(position = position_stack(reverse = TRUE)) +
+  theme_minimal() +
+  scale_fill_brewer(name= "Anno", palette = "Blues") +
+  labs(title = "Andamento vendite vista cc", y = "Vendite")
+```
+
+
+## Analisi stagionalità
+
+```{r}
+vista_anno_mese <- data %>%
+  group_by(anno, mese) %>%
+  summarise(vendite = sum(vendite_vista_cc)) %>%
+  group_by(anno) %>%
+  mutate("% annua" = scales::percent(vendite/sum(vendite)))
+
+vista_anno_mese
+```
+
+
+```{r}
+ggplot(vista_anno_mese, 
+       aes(x = mese, y = vendite, col = as.factor(anno))) +
+  geom_line(size = 1) +
+  scale_color_brewer(name= "Anno", palette = "Blues") +
+  labs(title = "Andamento vendite vista cc", y = "Vendite") +
+  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  theme_minimal()
+```
+
+# Confronto sole vista
+
+```{r}
+ggplot(data) +
+  geom_line(aes(x = settimana, y = vendite_sole_cc), col = "Orange") +
+  geom_line(aes(x = settimana, y = vendite_vista_cc), 
+            col = "royalblue") +
+  facet_wrap(.~anno) +
+  theme_minimal() +
+  labs(title = "Andamento vendite sole cc", y = "Vendite")
+```
